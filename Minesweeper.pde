@@ -1,17 +1,20 @@
 ArrayList<ArrayList<Tile>> tiles;
 public int rowCount;
 public int columnCount;
+public boolean isDed;
 
 public void setup()
 {
   tiles = new ArrayList<ArrayList<Tile>>();
-  size(400, 400);
+  size(400, 430);
 
   final float kWidth = width;
-  final float kHeight = height;
+  final float kHeight = height-GameConstants.scoreboardShift;
   rowCount = (int)(kWidth/(GameConstants.tileSize+GameConstants.spacing));
   columnCount = (int)(kHeight/(GameConstants.tileSize+GameConstants.spacing));
   createTiles();
+
+  isDed = false;
 
   noLoop();
   draw();
@@ -32,6 +35,8 @@ public void createTiles()
       currentRow.add(new Tile(0.1));
     }
   }
+
+  tiles.get(rowCount/2).get(columnCount/2).setIsMine(false);
 
   for (int i=0; i < rowCount; i++)
   {
@@ -70,6 +75,7 @@ public ArrayList<Integer> getNeighborCoordinates(int row, int column, boolean di
 
 public void draw()
 {
+  translate(0, GameConstants.scoreboardShift);
   for (int i=0; i < tiles.size(); i++)
     for (int j=0; j < tiles.get(i).size(); j++)
       tiles.get(i).get(j).show(i*GameConstants.tileSize + ((i+1)*GameConstants.spacing), j*GameConstants.tileSize + ((j+1)*GameConstants.spacing));
@@ -81,7 +87,7 @@ public void mousePressed()
   {
     for (int j=0; j < tiles.get(i).size(); j++)
     {
-      if (tiles.get(i).get(j).isInside(mouseX, mouseY))
+      if (tiles.get(i).get(j).isInside(mouseX, (int)(mouseY-GameConstants.scoreboardShift)))
       {
         handleClick(i, j, mouseButton, tiles.get(i).get(j));
       }
@@ -109,58 +115,65 @@ public void keyPressed()
 
 public void handleClick(int row, int column, int button, Tile originalTile)
 {
-  Tile tile = tiles.get(row).get(column);
-  if (button == LEFT && !tile.getIsShowing() && !tile.getIsFlagged())
+  if (!isDed)
   {
-    if (tile.getIsMine())
+    Tile tile = tiles.get(row).get(column);
+    if (button == LEFT && !tile.getIsShowing() && !tile.getIsFlagged())
     {
-      tile.setIsShowing(true);
-      println("ded");
-    }
-    else
-    {
-      tile.setIsShowing(true);
+      if (tile.getIsMine())
+      {
+        tile.setIsShowing(true);
+        isDed = true;
+      }
+      else
+      {
+        tile.setIsShowing(true);
 
+        ArrayList<Integer> neighborCoords = getNeighborCoordinates(row, column, true);
+        int flaggedNeighborCount = 0;
+        for (int k=0; k < neighborCoords.size(); k+=2)
+        {
+          Tile currentTile = tiles.get(neighborCoords.get(k)).get(neighborCoords.get(k+1));
+          if (!currentTile.getIsMine() && tile.getNeighborCount() == 0)
+          {
+            handleClick(neighborCoords.get(k), neighborCoords.get(k+1), button, originalTile);
+          }
+        }
+      }
+    }
+    else if (button == RIGHT && !tile.getIsShowing())
+    {
+      tile.setIsFlagged(!tile.getIsFlagged());
+    }
+    else if (button == LEFT && originalTile.getIsShowing() && originalTile.getNeighborCount() > 0)
+    {
       ArrayList<Integer> neighborCoords = getNeighborCoordinates(row, column, true);
       int flaggedNeighborCount = 0;
       for (int k=0; k < neighborCoords.size(); k+=2)
       {
         Tile currentTile = tiles.get(neighborCoords.get(k)).get(neighborCoords.get(k+1));
-        if (!currentTile.getIsMine() && tile.getNeighborCount() == 0)
+        if (currentTile.getIsFlagged())
         {
-          handleClick(neighborCoords.get(k), neighborCoords.get(k+1), button, originalTile);
+          flaggedNeighborCount++;
         }
       }
-    }
-  }
-  else if (button == RIGHT && !tile.getIsShowing())
-  {
-    tile.setIsFlagged(!tile.getIsFlagged());
-  }
-  else if (button == LEFT && originalTile.getIsShowing() && originalTile.getNeighborCount() > 0)
-  {
-    ArrayList<Integer> neighborCoords = getNeighborCoordinates(row, column, true);
-    int flaggedNeighborCount = 0;
-    for (int k=0; k < neighborCoords.size(); k+=2)
-    {
-      Tile currentTile = tiles.get(neighborCoords.get(k)).get(neighborCoords.get(k+1));
-      if (currentTile.getIsFlagged())
-      {
-        flaggedNeighborCount++;
-      }
-    }
 
-    if (originalTile.getNeighborCount() <= flaggedNeighborCount)
-    {
-      for (int k=0; k < neighborCoords.size(); k+=2)
+      if (originalTile.getNeighborCount() <= flaggedNeighborCount)
       {
-        Tile currentTile = tiles.get(neighborCoords.get(k)).get(neighborCoords.get(k+1));
-        if (!currentTile.getIsFlagged())
+        for (int k=0; k < neighborCoords.size(); k+=2)
         {
-          currentTile.setIsShowing(true);
-          if (currentTile.getIsMine())
+          Tile currentTile = tiles.get(neighborCoords.get(k)).get(neighborCoords.get(k+1));
+          if (!currentTile.getIsFlagged())
           {
-            println("ded");
+            if (currentTile.getNeighborCount() == 0)
+            {
+              handleClick(neighborCoords.get(k), neighborCoords.get(k+1), LEFT, currentTile);
+            }
+            currentTile.setIsShowing(true);
+            if (currentTile.getIsMine())
+            {
+              isDed = true;
+            }
           }
         }
       }

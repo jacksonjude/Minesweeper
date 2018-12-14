@@ -15,6 +15,7 @@ public class Tile
 
   public void setNeighborCount(int count) { neighborCount = count; }
   public int getNeighborCount() { return neighborCount; }
+  public void setIsMine(boolean mine) { isMine = mine; }
   public boolean getIsMine() { return isMine; }
   public void setIsShowing(boolean showing) { isShowing = showing; }
   public boolean getIsShowing() { return isShowing; }
