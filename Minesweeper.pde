@@ -11,6 +11,7 @@ public long currentSeed = -1;
 public boolean isEnteringSeed = false;
 public int flagsLeft = GameConstants.mineCount;
 public boolean devEnabled = false;
+public boolean controlIsDown = false;
 
 public void setup()
 {
@@ -137,7 +138,8 @@ public void mouseReleased()
 {
   if (!hasJustPlacedFlag)
   {
-    checkForTileClicked(mouseButton);
+    int mouseButtonTmp = controlIsDown ? RIGHT : mouseButton;
+    checkForTileClicked(mouseButtonTmp);
   }
   hasJustPlacedFlag = false;
   startedPressingMouseTime = -1;
@@ -180,6 +182,9 @@ public void keyPressed()
       isEnteringSeed = true;
       currentSeed = 0;
       break;
+    case 17:
+      controlIsDown = true;
+      break;
     default:
       //println(keyCode);
       break;
@@ -201,6 +206,18 @@ public void keyPressed()
       }
       break;
     }
+  }
+}
+
+public void keyReleased()
+{
+  switch (keyCode)
+  {
+  case 17:
+    controlIsDown = false;
+    break;
+  default:
+    break;
   }
 }
 
