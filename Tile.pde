@@ -45,7 +45,6 @@ public class Tile
     if (!isMine && isShowing && neighborCount != 0)
     {
       textAlign(CENTER);
-      textFont(createFont("Arial Bold", 13));
       switch (neighborCount)
       {
       case 1:
@@ -58,7 +57,7 @@ public class Tile
         fill(253, 22, 32);
         break;
       case 4:
-        fill(5, 0, 102);
+        fill(5, 0, 127);
         break;
       case 5:
         fill(135, 13, 18);
