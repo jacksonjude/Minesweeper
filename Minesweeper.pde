@@ -175,6 +175,7 @@ public void keyPressed()
       resetGame(currentSeed);
       break;
     case 32:
+    case 69:
       handleClick(rowCount/2, columnCount/2, LEFT, tiles.get(rowCount/2).get(columnCount/2));
       break;
     case 13:
