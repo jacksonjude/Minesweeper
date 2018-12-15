@@ -14,7 +14,7 @@ public boolean devEnabled = false;
 
 public void setup()
 {
-  size(700, 730);
+  size(525, 545);
 
   final float kWidth = width;
   final float kHeight = height-GameConstants.scoreboardShift;
