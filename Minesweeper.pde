@@ -25,7 +25,7 @@ public void setup()
 
   textFont(createFont("Arial Bold", 13));
 
-  println("MAX MINES -- ", (rowCount*columnCount-Math.pow(GameConstants.safeArea*2+1, 2)));
+  //println("MAX MINES -- ", (rowCount*columnCount-Math.pow(GameConstants.safeArea*2+1, 2)));
 }
 
 public void createTiles()
