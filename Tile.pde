@@ -6,11 +6,9 @@ public class Tile
   private float x, y;
   private boolean isFlagged;
 
-  public Tile(double randomFactor)
+  public Tile()
   {
-    isMine = ((Math.random()) < randomFactor);
     isShowing = false;
-    neighborCount = 0;
   }
 
   public void setNeighborCount(int count) { neighborCount = count; }
@@ -34,7 +32,7 @@ public class Tile
 
     if (!isMine && isShowing)
     {
-      fill(240);
+      fill(220);
     }
 
     if (!isShowing && isFlagged)
@@ -43,10 +41,35 @@ public class Tile
     }
 
     rect(x, y, GameConstants.tileSize, GameConstants.tileSize);
+
     if (!isMine && isShowing && neighborCount != 0)
     {
       textAlign(CENTER);
-      fill(0);
+      textFont(createFont("Arial Bold", 13));
+      switch (neighborCount)
+      {
+      case 1:
+        fill(21, 25, 249);
+        break;
+      case 2:
+        fill(2, 125, 31);
+        break;
+      case 3:
+        fill(253, 22, 32);
+        break;
+      case 4:
+        fill(5, 0, 102);
+        break;
+      case 5:
+        fill(135, 13, 18);
+        break;
+      case 6:
+        fill(3, 127, 127);
+        break;
+      default:
+        fill(0);
+        break;
+      }
       text(neighborCount, x+(GameConstants.tileSize/2)+1, y+(GameConstants.tileSize/2)+5);
     }
 

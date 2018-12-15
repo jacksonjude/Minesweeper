@@ -2,11 +2,14 @@ ArrayList<ArrayList<Tile>> tiles;
 public int rowCount;
 public int columnCount;
 public boolean isDed;
+public int startTime = -1;
+public int finalTime = -1;
+public boolean hasGeneratedMines = false;
 
 public void setup()
 {
   tiles = new ArrayList<ArrayList<Tile>>();
-  size(400, 430);
+  size(700, 730);
 
   final float kWidth = width;
   final float kHeight = height-GameConstants.scoreboardShift;
@@ -16,8 +19,7 @@ public void setup()
 
   isDed = false;
 
-  noLoop();
-  draw();
+  //noLoop();
 }
 
 public void createTiles()
@@ -32,11 +34,31 @@ public void createTiles()
     ArrayList<Tile> currentRow = tiles.get(i);
     for (int j=0; j < columnCount; j++)
     {
-      currentRow.add(new Tile(0.1));
+      currentRow.add(new Tile());
     }
   }
+}
 
-  tiles.get(rowCount/2).get(columnCount/2).setIsMine(false);
+public void generateMines(int startRow, int startColumn)
+{
+  //tiles.get(rowCount/2).get(columnCount/2).setIsMine(false);
+
+  int minesLeft = GameConstants.mineCount;
+  while (minesLeft > 0)
+  {
+    for (int i=0; i < rowCount; i++)
+    {
+      for (int j=0; j < columnCount; j++)
+      {
+        //println(startRow, startColumn, (startRow-GameConstants.safeArea >= i || startRow+GameConstants.safeArea <= i), (startColumn-GameConstants.safeArea >= j || startColumn+GameConstants.safeArea <= j), i, j);
+        if (!tiles.get(i).get(j).getIsMine() && Math.random() <= 1.0*GameConstants.mineCount/(rowCount*columnCount) && !(startRow-GameConstants.safeArea <= i && startRow+GameConstants.safeArea >= i && startColumn-GameConstants.safeArea <= j && startColumn+GameConstants.safeArea >= j))// (startRow-GameConstants.safeArea >= i || startRow+GameConstants.safeArea <= i) && (startColumn-GameConstants.safeArea >= j || startColumn+GameConstants.safeArea <= j))
+        {
+          tiles.get(i).get(j).setIsMine(true);
+          minesLeft--;
+        }
+      }
+    }
+  }
 
   for (int i=0; i < rowCount; i++)
   {
@@ -75,6 +97,22 @@ public ArrayList<Integer> getNeighborCoordinates(int row, int column, boolean di
 
 public void draw()
 {
+  background(204);
+  fill(0);
+  textAlign(CENTER);
+  text((finalTime == -1) ? ((startTime == -1) ? 0 : (millis()-startTime)/1000) : (finalTime), width/2, 20);
+
+  int showingTiles = 0;
+  for (int i=0; i < tiles.size(); i++)
+    for (int j=0; j < tiles.get(i).size(); j++)
+      if (tiles.get(i).get(j).getIsShowing() || (tiles.get(i).get(j).getIsFlagged() && tiles.get(i).get(j).getIsMine()))
+        showingTiles++;
+
+  if (showingTiles == rowCount*columnCount && finalTime == -1)
+  {
+    finalTime = (millis()-startTime)/1000;
+  }
+
   translate(0, GameConstants.scoreboardShift);
   for (int i=0; i < tiles.size(); i++)
     for (int j=0; j < tiles.get(i).size(); j++)
@@ -83,23 +121,27 @@ public void draw()
 
 public void mousePressed()
 {
+  checkForTileClicked(mouseButton);
+}
+
+public void checkForTileClicked(int button)
+{
   for (int i=0; i < tiles.size(); i++)
   {
     for (int j=0; j < tiles.get(i).size(); j++)
     {
       if (tiles.get(i).get(j).isInside(mouseX, (int)(mouseY-GameConstants.scoreboardShift)))
       {
-        handleClick(i, j, mouseButton, tiles.get(i).get(j));
+        handleClick(i, j, button, tiles.get(i).get(j));
+        startTime = (startTime == -1) ? millis() : startTime;
       }
     }
   }
-
-  redraw();
 }
 
 public void keyPressed()
 {
-  if (keyCode == 32)
+  if (keyCode == 67)
   {
     for (int i=0; i < tiles.size(); i++)
     {
@@ -109,12 +151,25 @@ public void keyPressed()
       }
     }
   }
-
-  redraw();
+  else if (keyCode == 32)
+  {
+    tiles = new ArrayList<ArrayList<Tile>>();
+    createTiles();
+    startTime = -1;
+    finalTime = -1;
+    isDed = false;
+    hasGeneratedMines = false;
+  }
 }
 
 public void handleClick(int row, int column, int button, Tile originalTile)
 {
+  if (!hasGeneratedMines)
+  {
+    generateMines(row, column);
+    hasGeneratedMines = true;
+  }
+
   if (!isDed)
   {
     Tile tile = tiles.get(row).get(column);
@@ -124,6 +179,7 @@ public void handleClick(int row, int column, int button, Tile originalTile)
       {
         tile.setIsShowing(true);
         isDed = true;
+        finalTime = (millis()-startTime)/1000;
       }
       else
       {
@@ -173,6 +229,7 @@ public void handleClick(int row, int column, int button, Tile originalTile)
             if (currentTile.getIsMine())
             {
               isDed = true;
+              finalTime = (millis()-startTime)/1000;
             }
           }
         }
