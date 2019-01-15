@@ -10,7 +10,6 @@ public boolean hasJustPlacedFlag = false;
 public long currentSeed = -1;
 public boolean isEnteringSeed = false;
 public int flagsLeft = GameConstants.mineCount;
-public boolean devEnabled = false;
 
 public void setup()
 {
@@ -48,6 +47,8 @@ public void createTiles()
 public void generateMines(int startRow, int startColumn)
 {
   int minesLeft = GameConstants.mineCount;
+
+  generateMinesLoop:
   while (minesLeft > 0)
   {
     for (int i=0; i < rowCount; i++)
@@ -58,6 +59,11 @@ public void generateMines(int startRow, int startColumn)
         {
           tiles.get(i).get(j).setIsMine(true);
           minesLeft--;
+        }
+
+        if (minesLeft <= 0)
+        {
+          break generateMinesLoop;
         }
       }
     }
@@ -297,7 +303,7 @@ public void resetGame(long seed)
 
 public void showTiles()
 {
-  if (devEnabled)
+  if (GameConstants.devEnabled)
   {
     for (int i=0; i < tiles.size(); i++)
     {
