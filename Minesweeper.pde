@@ -186,6 +186,9 @@ public void keyPressed()
       isEnteringSeed = true;
       currentSeed = 0;
       break;
+    case 69:
+      if (GameConstants.devEnabled) println(countMines());
+      break;
     default:
       //println(keyCode);
       break;
@@ -313,4 +316,18 @@ public void showTiles()
       }
     }
   }
+}
+
+public int countMines()
+{
+  int mines = 0;
+  for (int i=0; i < tiles.size(); i++)
+  {
+    for (int j=0; j < tiles.get(i).size(); j++)
+    {
+      mines += tiles.get(i).get(j).getIsMine() ? 1 : 0;
+    }
+  }
+
+  return mines;
 }
