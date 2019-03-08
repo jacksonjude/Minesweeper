@@ -141,6 +141,7 @@ public void mousePressed()
 
 public void mouseReleased()
 {
+  //println(countMinesLeft());
   if (!hasJustPlacedFlag)
   {
     checkForTileClicked(mouseButton);
@@ -232,6 +233,9 @@ public void handleClick(int row, int column, int button, Tile originalTile)
         tile.setIsShowing(true);
         isDed = true;
         finalTime = (millis()-startTime)/1000;
+        for (int i=0; i < tiles.size(); i++)
+          for (int j=0; j < tiles.get(i).size(); j++)
+            if ((!tiles.get(i).get(j).getIsMine() && tiles.get(i).get(j).getIsFlagged()) || (tiles.get(i).get(j).getIsMine() && !tiles.get(i).get(j).getIsFlagged())) tiles.get(i).get(j).setIsShowing(true);
       }
       else
       {
@@ -326,6 +330,20 @@ public int countMines()
     for (int j=0; j < tiles.get(i).size(); j++)
     {
       mines += tiles.get(i).get(j).getIsMine() ? 1 : 0;
+    }
+  }
+
+  return mines;
+}
+
+public int countMinesLeft()
+{
+  int mines = 0;
+  for (int i=0; i < tiles.size(); i++)
+  {
+    for (int j=0; j < tiles.get(i).size(); j++)
+    {
+      mines += (tiles.get(i).get(j).getIsMine() && !tiles.get(i).get(j).getIsFlagged()) ? 1 : 0;
     }
   }
 
